@@ -1,63 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<title>Document</title>
-	<link rel="stylesheet" href="css/bootstrap.css">
-	<link rel="stylesheet" href="css/styles.css">
-	<script src="js/jquery.js"></script>
-	<script src="js/bootstrap.js"></script>
-	<script src="js/scripts.js"></script>
-</head>
-<body>
-	
+<?php include_once("includes/header.php") ?>
+<?php include_once("includes/navbar.php") ?>
+
 <div class="container">
-
 	<div class="row">
+		<div class="col-md-6 offset-md-3 mt-5">
+			<div class="card panel-login">
+				<div class="card-header">
+					<div class="row">
 
-	</div>
-    	<div class="row">
-			<div class="col-md-6 col-md-offset-3">
-				<div class="panel panel-login">
-					<div class="panel-heading">
-						<div class="row">
-						
-							<div class="col-xs-12">
-								<h3>Reset Password</h3>
-							</div>
+						<div class="col-12">
+							<h3>Reset Password</h3>
 						</div>
-						<hr>
 					</div>
-					<div class="panel-body">
-						<div class="row">
-							<div class="col-lg-12">
-								<form id="register-form" method="post" role="form" >
+				</div>
+				<div class="card-body">
+					<div class="row">
+						<div class="col-lg-12">
+							<form id="register-form" method="post" role="form">
 
-									<div class="form-group">
-										<input type="password" name="password" id="password" tabindex="2" class="form-control" placeholder="Password" required>
-									</div>
-									<div class="form-group">
-										<input type="password" name="confirm_password" id="confirm-password" tabindex="2" class="form-control" placeholder="Confirm Password" required>
-									</div>
-									<div class="form-group">
-										<div class="row">
-											<div class="col-sm-6 col-sm-offset-3">
-												<input type="submit" name="reset-password-submit" id="reset-password-submit" tabindex="4" class="form-control btn btn-register" value="Reset Password">
-											</div>
+								<div class="mb-3">
+									<input type="password" name="password" id="password" tabindex="2" class="form-control" placeholder="Password" required>
+								</div>
+								<div class="mb-3">
+									<input type="password" name="confirm_password" id="confirm-password" tabindex="2" class="form-control" placeholder="Confirm Password" required>
+								</div>
+								<div class="mb-3">
+									<div class="row">
+										<div class="col-6 offset-3">
+											<input type="submit" name="reset-password-submit" id="reset-password-submit" tabindex="4" class="form-control btn btn-outline-secondary" value="Reset Password">
 										</div>
 									</div>
-								</form>
-							</div>
+								</div>
+							</form>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
+</div>
 
-
-
-
-	
-</body>
-</html>
+<?php include_once("includes/footer.php") ?>
