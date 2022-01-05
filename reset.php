@@ -1,18 +1,21 @@
-<?php include("includes/header.php") ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<link rel="stylesheet" href="css/styles.css">
+	<script src="js/jquery.js"></script>
+	<script src="js/bootstrap.js"></script>
+	<script src="js/scripts.js"></script>
+</head>
+<body>
+	
+<div class="container">
 
 	<div class="row">
-		<div class="col-lg-6 col-lg-offset-3">	
 
-			<?php display_message(); ?>
-
-			<?php password_reset(); ?>
-		
-						
-		</div>
 	</div>
-
-		
-
     	<div class="row">
 			<div class="col-md-6 col-md-offset-3">
 				<div class="panel panel-login">
@@ -43,7 +46,6 @@
 											</div>
 										</div>
 									</div>
-									<input type="hidden" class="hide" name="token" id="token" value="<?php echo token_generator(); ?>">
 								</form>
 							</div>
 						</div>
@@ -51,4 +53,11 @@
 				</div>
 			</div>
 		</div>
-<?php include("includes/footer.php") ?>
+	</div>
+
+
+
+
+	
+</body>
+</html>
