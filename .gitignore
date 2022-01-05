@@ -1,0 +1,6 @@
+# Ignore Directories
+/b2w
+/shop
+
+# Ignore files
+*.zip
