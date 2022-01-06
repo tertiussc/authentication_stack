@@ -1,3 +1,4 @@
+<?php require_once("functions/init.php"); ?>
 <!doctype html>
 <html lang="en">
 

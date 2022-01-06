@@ -3,6 +3,19 @@
 <!-- Index Page Start -->
 <main class="container">
   <h1>Index Page</h1>
+  <?php 
+  $sql = "SELECT * FROM users";
+
+  $result = query($sql);
+
+  confirm($result);
+
+  $users = fetch_array($result);
+
+  echo $users['username'];
+ 
+
+  ?>
 </main>
 
 
