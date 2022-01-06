@@ -1,4 +1,8 @@
 <?php
+
+/** Connection to the database
+ * @return boolean $con Connection to the database
+ */
 $con = mysqli_connect("localhost", "loginDB_admin", "hOUxUA6!Ljw]K]r0", "login_db");
 
 /** Escape special characters
