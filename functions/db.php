@@ -61,7 +61,7 @@ function fetch_array($result)
 }
 
 
-/** get the number of rows
+/** Get the number of rows
  * 
  * @return integer Number of rows in a result set
  */

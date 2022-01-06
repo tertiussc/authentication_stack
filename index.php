@@ -11,7 +11,7 @@
   confirm($result);
 
   $users = fetch_array($result);
-
+  echo "There are " . row_count($result) . " row(s) of data. <br>";
   echo $users['username'];
  
 
