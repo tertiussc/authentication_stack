@@ -1,13 +1,13 @@
 <?php include_once("includes/header.php") ?>
 <?php include_once("includes/navbar.php") ?>
 <?php
-// Initialize values
-$first_name = (isset($first_name)) ? $first_name : '';
+
 ?>
 <div class="container">
 	<div class="row">
 		<div class="col-lg-6 offset-lg-3">
 			<?php validate_user_registration(); ?>
+
 		</div>
 	</div>
 	<div class="row">
@@ -29,7 +29,7 @@ $first_name = (isset($first_name)) ? $first_name : '';
 							<form id="register-form" method="post" role="form">
 
 								<div class="mb-3">
-									<input type="text" name="first_name" id="first_name" tabindex="1" class="form-control" placeholder="First Name" value="<?= $first_name;?>" required>
+									<input type="text" name="first_name" id="first_name" tabindex="1" class="form-control" placeholder="First Name" value="" required>
 								</div>
 								<div class="mb-3">
 									<input type="text" name="last_name" id="register_last_name" tabindex="1" class="form-control" placeholder="Last Name" value="" required>

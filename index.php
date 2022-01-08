@@ -3,6 +3,7 @@
 <!-- Index Page Start -->
 <main class="container">
   <h1>Index Page</h1>
+  <?php display_message(); ?>
   <?php 
   $sql = "SELECT * FROM users";
 
