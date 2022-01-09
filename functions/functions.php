@@ -85,6 +85,12 @@ function username_exist($username)
     }
 }
 
+function send_email($email, $subject, $message, $headers)
+{
+    // php mail built in function
+    return mail($email, $subject, $message, $headers);
+}
+
 
 /********** Validation functions **********/
 
@@ -156,11 +162,36 @@ function validate_user_registration()
 
             // Redirect to home page
             redirect("index.php");
+        } else {
+            set_messages("
+                            <div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                                <strong>User not registered!</strong> Please try again
+                                <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                            </div>
+                        ");
         }
     }
 }
 
 
+/********** Register functions **********/
+
+/**Register the user in the DB
+ * 
+ * Escape the inputs to avoid SQL injections
+ * 
+ * @param string $first_name    First name from the registration form
+ * @param string $last_name     Last name from the registration form
+ * @param string $username      Username from the registration form
+ * @param string $email         Email from the registration form
+ * @param string $password      Password from the registration form
+ * 
+ * Hash the user's password
+ * 
+ * Create a hashed validation code
+ * 
+ * @return void Send an email to the user to activate their account 
+ */
 function register_user($first_name, $last_name, $username, $email, $password)
 {
     // Clean the input data
@@ -187,6 +218,68 @@ function register_user($first_name, $last_name, $username, $email, $password)
         $result = query($sql);
         confirm($result);
 
+        // Send email
+        $subject = "Activate your account";
+        $message = "Please click the link to activate you account. <br>";
+        $message .= "http://localhost/authentication_stack/activate.php?email=$email&code=$validation_code";
+        $headers = "From: noreply@yourwebsite.com";
+        // call email function
+        send_email($email, $subject, $message, $headers);
+
         return true;
+    }
+}
+
+
+
+/********** Activate functions **********/
+
+
+/**Activate the user
+ * This function will activate the user status in the DB when the user clicks on the activation email
+ * 
+ * @return void Set a success message in sessions and redirect the user to the login page
+ */
+function activate_user()
+{
+    if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+        if (isset($_GET['email'])) {
+            // clean the data
+            $email = clean($_GET['email']);
+            $validation_code = clean($_GET['code']);
+
+            // Get the user
+            $sql = "SELECT id FROM users 
+                    WHERE email = '" . escape($email) .
+                "' AND validation_code = '" . escape($_GET['code']) . "'";
+            $result = query($sql);
+            confirm($result);
+            echo row_count($result);
+
+            // Activate the user in the DB
+            if (row_count($result) == 1) {
+                // Set activation to 1
+                $sql2 = "UPDATE users 
+                        SET active=1, validation_code = 0 
+                        WHERE email = '" . escape($email) . "'
+                        AND validation_code = '" . escape($validation_code) . "'";
+                $result2 = query($sql2);
+                confirm($result2);
+
+                // Set successfull activation message in a session
+                set_messages("<div class='alert alert-success alert-dismissible fade show' role='alert'>
+                    <strong>Account Activated!</strong> <a class='text-decoration-none text-reset' href='login.php'>Please login<a>
+                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                </div>");
+
+                // Redirect to login
+                redirect("login.php");
+            } else {
+                echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                    <strong>Account not activated, user not found</strong> Please try and click (or copy exactly) the activation email link again
+                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                </div>";
+            }
+        }
     }
 }

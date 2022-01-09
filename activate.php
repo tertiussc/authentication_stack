@@ -3,6 +3,7 @@
 <!-- Index Page Start -->
 <main class="container">
   <h1>Activate page</h1>
+  <?php activate_user(); ?>
 </main>
 
 
