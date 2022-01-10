@@ -7,16 +7,28 @@
             <div class="collapse navbar-collapse " id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="index.php">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="login.php">Login</a>
+                        <a class="nav-link active" aria-current="page" href="login.php">login</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="register.php">Register</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="activate.php">Activate</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin.php">Admin</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="reset.php">Reset</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="recover.php">Recover</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="code.php">Code</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="logout.php">Logout</a>
                     </li>
                 </ul>
             </div>

@@ -173,6 +173,98 @@ function validate_user_registration()
     }
 }
 
+/** Validate user login
+ * 
+ * @param string $email The user's registered email
+ * 
+ * @param string $password The user's password
+ * 
+ * @return void Log user in and redirect to home page
+ */
+function validate_login()
+{
+    // Store errors when they occur
+    $errors = [];
+
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+        // Clean inputs
+        $email = clean($_POST['email']);
+        $password = clean($_POST['password']);
+
+        // Check that the required fields are not empty
+        if (empty($email)) {
+            $errors = "Your login email is required";
+        }
+        if (empty($password)) {
+            $errors = "Your password is required";
+        }
+
+        // Display errors when found
+        if (!empty($errors)) {
+            foreach ($errors as $error) {
+                echo "<p class='callout-danger'>$error</p><br>";
+            }
+        } else {
+
+            // Call the user login functionality
+            if (login_user($email, $password)) {
+
+                // Redirect the user if login is successful
+                redirect("admin.php");
+            } else {
+                echo "<p class='callout-danger'>Login credentials not correct</p><br>";
+            }
+        }
+    }
+}
+
+/**Login the user
+ * 
+ * @param string $email The user's resgitered email
+ * 
+ * @param string $password The user's password
+ * 
+ * @return boolean True if login is successful false if not
+ * 
+ */
+function login_user($email, $password)
+{
+
+    // Escape the parameters
+    $email = escape($email);
+    $password = escape($password);
+
+    $sql = "SELECT id, password, active FROM users
+            WHERE email = '" . $email . "'";
+    $result = query($sql);
+    confirm($result);
+
+    // Check to see if a record was found
+    if (row_count($result) == 1) {
+
+        // retrieve the record from the DB as an array
+        $row = fetch_array($result);
+
+        // extract the user's password
+        $user_password = $row['password'];
+        $active = $row['active'];
+
+        // Compare the password to see if it matches
+        if (md5($password) == $user_password && $active == 1) {
+
+            // if the password match return true
+            return true;
+        } else {
+            // If the password does not match return false
+            return false;
+        }
+
+        return true;
+    } else {
+        return false;
+    }
+}
 
 /********** Register functions **********/
 
