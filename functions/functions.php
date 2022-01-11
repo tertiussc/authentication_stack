@@ -113,6 +113,56 @@ function validate_user_registration()
         $email = clean($_POST["email"]);
         $password = clean($_POST["password"]);
         $confirm_password = clean($_POST["confirm_password"]);
+
+        if (strlen($first_name) <= $min || strlen($first_name) >= $max) {
+            $errors[] = "First name length must be between {$min} and {$max} characters long";
+        }
+        if (strlen($last_name) <= $min || strlen($last_name) >= $max) {
+            $errors[] = "Last name length must be between {$min} and {$max} characters long";
+        }
+        if (strlen($username) <= $min || strlen($username) >= $max) {
+            $errors[] = "Username length must not be between {$min} and {$max} characters long";
+        }
+
+        if (username_exist($username)) {
+            $errors[] = "This username is already in use";
+        }
+
+        if (email_exist($email)) {
+            $errors[] = "This email is already in use";
+        }
+
+        if ($password !== $confirm_password) {
+            $errors[] = "Your passwords do not match";
+        }
+
+        // Display errors if there are any otherwise insert the new user into the users table
+        if (!empty($errors)) {
+            foreach ($errors as $error) {
+                echo "<p class='callout-danger'>$error</p><br>";
+            }
+        } else {
+            if (register_user($first_name, $last_name, $username, $email, $password)) {
+
+                // Set successful registration message
+                set_messages("
+                            <div class='alert alert-success alert-dismissible fade show' role='alert'>
+                                <strong>User registered!</strong> Please check you email (or spam) for activation.
+                                <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                            </div>
+                        ");
+
+                // Redirect to home page
+                redirect("index.php");
+            } else {
+                set_messages("
+                            <div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                                <strong>User not registered!</strong> Please try again
+                                <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                            </div>
+                        ");
+            }
+        }
     } else {
         $first_name = "";
         $last_name = "";
@@ -122,55 +172,7 @@ function validate_user_registration()
         $confirm_password = "";
     }
 
-    if (strlen($first_name) <= $min || strlen($first_name) >= $max) {
-        $errors[] = "First name length must be between {$min} and {$max} characters long";
-    }
-    if (strlen($last_name) <= $min || strlen($last_name) >= $max) {
-        $errors[] = "Last name length must be between {$min} and {$max} characters long";
-    }
-    if (strlen($username) <= $min || strlen($username) >= $max) {
-        $errors[] = "Username length must not be between {$min} and {$max} characters long";
-    }
-
-    if (username_exist($username)) {
-        $errors[] = "This username is already in use";
-    }
-
-    if (email_exist($email)) {
-        $errors[] = "This email is already in use";
-    }
-
-    if ($password !== $confirm_password) {
-        $errors[] = "Your passwords do not match";
-    }
-
-    // Display errors if there are any otherwise insert the new user into the users table
-    if (!empty($errors)) {
-        foreach ($errors as $error) {
-            echo "<p class='callout-danger'>$error</p><br>";
-        }
-    } else {
-        if (register_user($first_name, $last_name, $username, $email, $password)) {
-
-            // Set successful registration message
-            set_messages("
-                            <div class='alert alert-success alert-dismissible fade show' role='alert'>
-                                <strong>User registered!</strong> Please check you email (or spam) for activation.
-                                <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-                            </div>
-                        ");
-
-            // Redirect to home page
-            redirect("index.php");
-        } else {
-            set_messages("
-                            <div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                                <strong>User not registered!</strong> Please try again
-                                <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-                            </div>
-                        ");
-        }
-    }
+    
 }
 
 /** Validate user login data and then call the login function
