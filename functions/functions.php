@@ -173,7 +173,7 @@ function validate_user_registration()
     }
 }
 
-/** Validate user login
+/** Validate user login data and then call the login function
  * 
  * @param string $email The user's registered email
  * 
@@ -236,7 +236,7 @@ function login_user($email, $password)
     $password = escape($password);
 
     $sql = "SELECT id, password, active FROM users
-            WHERE email = '" . $email . "'";
+            WHERE email = '{$email}'";
     $result = query($sql);
     confirm($result);
 
@@ -253,6 +253,9 @@ function login_user($email, $password)
         // Compare the password to see if it matches
         if (md5($password) == $user_password && $active == 1) {
 
+            // save the authentication in the session
+            $_SESSION['logged_in'] = md5($email);
+
             // if the password match return true
             return true;
         } else {
@@ -260,6 +263,18 @@ function login_user($email, $password)
             return false;
         }
 
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/** Check to see if the user is logged in
+ * 
+ * @return boolean True if the user is logged in false if not
+ */
+function logged_in() {
+    if (isset($_SESSION['logged_in'])) {
         return true;
     } else {
         return false;
@@ -343,7 +358,7 @@ function activate_user()
             // Get the user
             $sql = "SELECT id FROM users 
                     WHERE email = '" . escape($email) .
-                "' AND validation_code = '" . escape($_GET['code']) . "'";
+                "' AND validation_code = '" . escape($validation_code) . "'";
             $result = query($sql);
             confirm($result);
             echo row_count($result);

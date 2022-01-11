@@ -13,8 +13,13 @@
 
   $users = fetch_array($result);
   echo "There are " . row_count($result) . " row(s) of data. <br>";
-  echo $users['username'];
- 
+  echo $users['username'] . "<br>";
+  
+  if (logged_in()){
+    echo "Logged In";
+  }
+  echo "<br>";
+  var_dump($_SESSION);
 
   ?>
 </main>

@@ -1,6 +1,6 @@
 <?php include_once("includes/header.php") ?>
 <?php include_once("includes/navbar.php") ?>
-<?php 
+<?php
 // $email = ''; 
 // $password = ''; 
 ?>
@@ -10,6 +10,7 @@
 		<div class="col-md-6 offset-md-3 mt-5">
 			<?php display_message(); ?>
 			<?php validate_login() ?>
+			
 		</div>
 	</div>
 	<div class="row">
