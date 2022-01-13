@@ -259,8 +259,6 @@ function login_user($email, $password, $remember)
     $email = escape($email);
     $password = escape($password);
 
-    // hash the entered password
-    $password = md5($password);
 
     // SQL query to retrieve user
     $sql = "SELECT id, password, active FROM users
@@ -279,7 +277,7 @@ function login_user($email, $password, $remember)
         $row = fetch_array($result);
 
         // extract the user's password
-        $user_password = $row['password'];
+        $db_password = $row['password'];
         $active = $row['active'];
 
         if ($active != 1) {
@@ -288,7 +286,7 @@ function login_user($email, $password, $remember)
                     <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
                 </div>");
             return true;
-        } elseif ($password == $user_password && $active == 1) {
+        } elseif (password_verify($password, $db_password) && $active == 1) {
 
             // if remember was checked set a cookie
             if ($remember == "1") {
@@ -338,8 +336,6 @@ function logged_in()
  * @param string $email         Email from the registration form
  * @param string $password      Password from the registration form
  * 
- * Hash the user's password
- * 
  * Create a hashed validation code
  * 
  * @return void Send an email to the user to activate their account 
@@ -359,7 +355,7 @@ function register_user($first_name, $last_name, $username, $email, $password)
         return true;
     } else {
         // encrypt password
-        $password = md5($password);
+        $password = password_hash($password, PASSWORD_DEFAULT);
 
         // 
         $validation_code = md5($username . microtime());
