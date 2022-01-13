@@ -59,6 +59,12 @@ function token_generator()
     return $token;
 }
 
+/** Check if the email is in use
+ * 
+ * @param string $email The user's email addressed
+ * 
+ * @return boolean True if it exist and false if not
+ */
 function email_exist($email)
 {
     $sql = "SELECT id from users WHERE email = '$email'";
@@ -72,6 +78,12 @@ function email_exist($email)
     }
 }
 
+/** Check if the username is in use
+ * 
+ * @param string $username The user's email addressed
+ * 
+ * @return boolean True if it exist and false if not
+ */
 function username_exist($username)
 {
     $sql = "SELECT id from users WHERE username = '$username'";
@@ -85,6 +97,18 @@ function username_exist($username)
     }
 }
 
+/** Send email
+ * 
+ * @param string $email The user's email address
+ * 
+ * @param string $subject The email's subject
+ * 
+ * @param string $message The email message
+ * 
+ * @param string $headers The email header (from email information)
+ * 
+ * @return void Send the email
+ */
 function send_email($email, $subject, $message, $headers)
 {
     // php mail built in function
@@ -97,6 +121,7 @@ function send_email($email, $subject, $message, $headers)
 /** Validate registration fields: 
  * Cleans input values. 
  * Check to see if $first_name, $last_name and $username is between the minimum and maximum allowed characters
+ * 
  * @return string $error Returns error messages if any is found
  */
 function validate_user_registration()
@@ -145,22 +170,18 @@ function validate_user_registration()
             if (register_user($first_name, $last_name, $username, $email, $password)) {
 
                 // Set successful registration message
-                set_messages("
-                            <div class='alert alert-success alert-dismissible fade show' role='alert'>
+                set_messages("<div class='alert alert-success alert-dismissible fade show' role='alert'>
                                 <strong>User registered!</strong> Please check you email (or spam) for activation.
                                 <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-                            </div>
-                        ");
+                            </div>");
 
                 // Redirect to home page
                 redirect("index.php");
             } else {
-                set_messages("
-                            <div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                set_messages("<div class='alert alert-danger alert-dismissible fade show' role='alert'>
                                 <strong>User not registered!</strong> Please try again
                                 <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-                            </div>
-                        ");
+                            </div>");
             }
         }
     } else {
@@ -171,8 +192,6 @@ function validate_user_registration()
         $password = "";
         $confirm_password = "";
     }
-
-    
 }
 
 /** Validate user login data and then call the login function
@@ -193,6 +212,9 @@ function validate_login()
         // Clean inputs
         $email = clean($_POST['email']);
         $password = clean($_POST['password']);
+        // check if the user selected the remember me checkbox
+        $remember = isset($_POST['remember']);
+        $remember = clean($remember);
 
         // Check that the required fields are not empty
         if (empty($email)) {
@@ -210,7 +232,7 @@ function validate_login()
         } else {
 
             // Call the user login functionality
-            if (login_user($email, $password)) {
+            if (login_user($email, $password, $remember)) {
 
                 // Redirect the user if login is successful
                 redirect("admin.php");
@@ -221,7 +243,7 @@ function validate_login()
     }
 }
 
-/**Login the user
+/** Login the user
  * 
  * @param string $email The user's resgitered email
  * 
@@ -230,16 +252,24 @@ function validate_login()
  * @return boolean True if login is successful false if not
  * 
  */
-function login_user($email, $password)
+function login_user($email, $password, $remember)
 {
 
     // Escape the parameters
     $email = escape($email);
     $password = escape($password);
 
+    // hash the entered password
+    $password = md5($password);
+
+    // SQL query to retrieve user
     $sql = "SELECT id, password, active FROM users
-            WHERE email = '{$email}'";
+            WHERE email = '$email'";
+
+    // Save the result from the query
     $result = query($sql);
+
+    // check that the query was correct
     confirm($result);
 
     // Check to see if a record was found
@@ -252,11 +282,21 @@ function login_user($email, $password)
         $user_password = $row['password'];
         $active = $row['active'];
 
-        // Compare the password to see if it matches
-        if (md5($password) == $user_password && $active == 1) {
+        if ($active != 1) {
+            set_messages("<div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                    <strong>Account not active!</strong> Please use activation email to activate your account.
+                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                </div>");
+            return true;
+        } elseif ($password == $user_password && $active == 1) {
+
+            // if remember was checked set a cookie
+            if ($remember == "1") {
+                setcookie('save_login', 'true', time() + 86400);
+            }
 
             // save the authentication in the session
-            $_SESSION['logged_in'] = md5($email);
+            $_SESSION['logged_in'] = 'true';
 
             // if the password match return true
             return true;
@@ -271,21 +311,24 @@ function login_user($email, $password)
     }
 }
 
+
 /** Check to see if the user is logged in
  * 
  * @return boolean True if the user is logged in false if not
  */
-function logged_in() {
-    if (isset($_SESSION['logged_in'])) {
+function logged_in()
+{
+    if (isset($_SESSION['logged_in']) || isset($_COOKIE['save_login'])) {
         return true;
     } else {
+        redirect("login.php");
         return false;
     }
 }
 
 /********** Register functions **********/
 
-/**Register the user in the DB
+/** Register the user in the DB
  * 
  * Escape the inputs to avoid SQL injections
  * 
@@ -311,9 +354,9 @@ function register_user($first_name, $last_name, $username, $email, $password)
     $password       = escape($password);
 
     if (email_exist($email)) {
-        return false;
+        return true;
     } elseif (username_exist($username)) {
-        return false;
+        return true;
     } else {
         // encrypt password
         $password = md5($password);
@@ -356,22 +399,25 @@ function activate_user()
             // clean the data
             $email = clean($_GET['email']);
             $validation_code = clean($_GET['code']);
+            // Escape the data
+            $email = escape($email);
+            $validation_code = escape($validation_code);
 
             // Get the user
             $sql = "SELECT id FROM users 
-                    WHERE email = '" . escape($email) .
-                "' AND validation_code = '" . escape($validation_code) . "'";
+                    WHERE email = '$email' 
+                    AND validation_code = '$validation_code'";
             $result = query($sql);
             confirm($result);
-            echo row_count($result);
 
             // Activate the user in the DB
             if (row_count($result) == 1) {
+
                 // Set activation to 1
                 $sql2 = "UPDATE users 
                         SET active=1, validation_code = 0 
-                        WHERE email = '" . escape($email) . "'
-                        AND validation_code = '" . escape($validation_code) . "'";
+                        WHERE email = '$email'
+                        AND validation_code = '$validation_code'";
                 $result2 = query($sql2);
                 confirm($result2);
 
