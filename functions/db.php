@@ -28,7 +28,9 @@ function query($query)
 {
     global $con;
 
-    return mysqli_query($con, $query);
+    return $result = mysqli_query($con, $query);
+
+    confirm($result);
 };
 
 /** Confirm that a query is correct

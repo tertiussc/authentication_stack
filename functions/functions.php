@@ -267,9 +267,6 @@ function login_user($email, $password, $remember)
     // Save the result from the query
     $result = query($sql);
 
-    // check that the query was correct
-    confirm($result);
-
     // Check to see if a record was found
     if (row_count($result) == 1) {
 
@@ -364,7 +361,6 @@ function register_user($first_name, $last_name, $username, $email, $password)
                 VALUES ('$first_name','$last_name','$username','$email','$password','$validation_code','0')";
 
         $result = query($sql);
-        confirm($result);
 
         // Send email
         $subject = "Activate your account";
@@ -404,7 +400,6 @@ function activate_user()
                     WHERE email = '$email' 
                     AND validation_code = '$validation_code'";
             $result = query($sql);
-            confirm($result);
 
             // Activate the user in the DB
             if (row_count($result) == 1) {
@@ -415,7 +410,6 @@ function activate_user()
                         WHERE email = '$email'
                         AND validation_code = '$validation_code'";
                 $result2 = query($sql2);
-                confirm($result2);
 
                 // Set successfull activation message in a session
                 set_messages("<div class='alert alert-success alert-dismissible fade show' role='alert'>
@@ -460,13 +454,12 @@ function recover_password()
                 // Create a validation code
                 $validation_code = md5($email . microtime());
 
-                // Set cookie
-                setcookie('temp_access_code', $validation_code, time() + 60);
+                // Set cookie with expiry of 1 hour. if the cookie expire the user will have to recover password again
+                setcookie('temp_access_code', $validation_code, time() + 3600);
 
                 // send the validation code to the database
                 $sql = "UPDATE users SET validation_code = '$validation_code' WHERE email = '$email'";
                 $result = query($sql);
-                confirm($result);
 
                 // Assign email variable values
                 $email = "$email";
@@ -474,27 +467,100 @@ function recover_password()
                 $message = "Here is your password reset code: {$validation_code} click here to reset you password http://localhost/authentication_stack/code.php?email=$email&code=$validation_code";
                 $headers = "From: noreply@yourwebsite.com";
 
-                // Send the email
-                if (send_email($email, $subject, $message, $headers)) {
-                    echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
+                // Send the email 
+                // *** Attention => remove the exclamation(!) from the send_email function
+                if (!send_email($email, $subject, $message, $headers)) {
+                    set_messages("<div class='alert alert-success alert-dismissible fade show' role='alert'>
                     <strong>Password reset email sent</strong> Please check your email: {$email} to reset your password.
                     <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-                </div>";
-                } else {
-                    echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                    <strong>Unable to send reset email</strong> Please try again later
-                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-                </div>";
-                };
+                </div>");
+                    redirect("login.php");
+                }
+
+                // *** Attention: add else statement back in for production
+                // else {
+                //     echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                //     <strong>Unable to send reset email</strong> Please try again later
+                //     <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                // </div>";
+                // };
             } else {
                 // Show error if the email does not exist
                 echo "<p class='callout-danger'>This email address does not exist</p>";
             }
-
-            echo "Form is working";
         } else {
             // If the token is not set or does not match redirect the user
             redirect("login.php");
         }
+    }
+}
+
+
+function validate_code()
+{
+    if (isset($_COOKIE['temp_access_code'])) {
+
+        // Check to see if any information is passed using the GET method (e.g. URL + ?name=value)
+        if (
+            isset($_GET['email']) &&
+            $_GET['email'] != '' &&
+            isset($_GET['code']) &&
+            $_GET['code'] != ''
+
+        ) {
+
+            // Execute code
+            if (isset($_POST['code-submit'])) {
+                // Do something
+                echo "<p class='callout-success'>Email and Code received and submit button pressed.</p>";
+
+                // clean the data
+                $email = clean($_POST['email']);
+                $validation_code = clean($_POST['code']);
+                // escape the data
+                $email = escape($email);
+                $validation_code = escape($validation_code);
+
+                // Query the DB
+                $sql = "SELECT * FROM users 
+                        WHERE validation_code = '$validation_code' 
+                        AND email = '$email'"; // maybe remove the email incase the user copy and paste the validation code || add a field for email
+                $result = query($sql);
+
+                // Check to see if the record was found
+                if (row_count($result) == 1) {
+                    // if all is good redirect to reset page
+                    redirect("reset.php");
+                } else {
+                    // if the user was not found show error
+                    echo "<p class='callout-danger'>Please confirm reset code to reset your password </p>";
+                }
+            } elseif (isset($_POST['code-cancel'])) {
+                // If the user clicks cancel then redirect to login
+                redirect("login.php");
+            }
+        } else {
+            set_messages("<div class='alert alert-success alert-dismissible fade show' role='alert'>
+                    <strong>Invalid reset data received</strong> Please check your email.
+                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                </div>");
+        }
+
+
+        // If the cookie is still valid when the user reaches this page set success message
+        set_messages("<div class='alert alert-success alert-dismissible fade show' role='alert'>
+                    Please enter you reset code. 
+                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                </div>");
+    } else {
+
+        // Set message if the cookie is expired
+        set_messages("<div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                    Your validation code has expired, please use password recovery function again. 
+                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                </div>");
+
+        // If the cookie is expired redirect the user to recover to send recovery email again.
+        redirect("recover.php");
     }
 }

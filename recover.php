@@ -1,6 +1,6 @@
 <?php include_once("includes/header.php") ?>
 <?php include_once("includes/navbar.php") ?>
-<?php 
+<?php
 // PHP COde
 
 ?>
@@ -8,8 +8,8 @@
 	<div class="row">
 		<div class="col-md-8 offset-md-2 my-5">
 			<div class="alert-placeholder">
+				<?php display_message(); ?>
 				<?php recover_password(); ?>
-
 			</div>
 			<div class="card border-success">
 				<div class="card-body">

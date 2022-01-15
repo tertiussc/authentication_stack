@@ -1,43 +1,48 @@
 <?php include("includes/header.php"); ?>
+<?php
+// PHP code
+// assign a value to $code to populate the form
+isset($_GET['email']) ? $email = $_GET['email'] : $email = '';
+isset($_GET['code']) ? $code = $_GET['code'] : $code = '';
 
+?>
 <main class="container">
 	<div class="row">
 		<div class="container">
-			<div class="col-lg-8 offset-lg-2 mt-5">
-				<div class="alert alert-success alert-dismissible fade show" role="alert">
-					We have a sent a security code to your email <span>@edwin@email.com</span>
-					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-				</div>
+			<div class="col-md-6 offset-md-3 mt-5">
+
+				<?php
+				display_message(); // Check for messages first	
+				validate_code();
+				?>
 			</div>
-			<div class="col-lg-8 offset-lg-2">
-				<div class="alert-placeholder">
-				</div>
+			<div class="col-md-6 offset-md-3">
+
 				<div class="card border-success">
 					<div class="card-body">
 						<div class="row">
-							<div class="col-lg-12">
-								<div class="text-center">
-									<h2><b> Enter Code</b></h2>
+							<div class="text-center">
+								<h2>Validate Reset</h2>
+							</div>
+							<form id="register-form" method="post" role="form" autocomplete="off">
+								<div class="mb-3">
+									<input type="text" name="email" id="email" tabindex="1" class="form-control" placeholder="Enter email address" autocomplete="off" required value="<?= $email ?>" />
 								</div>
-								<form id="register-form" method="post" role="form" autocomplete="off">
-									<div class="mb-3 form-group">
-										<input type="text" name="code" id="code" tabindex="1" class="form-control" placeholder="Enter your secure code here" value="" autocomplete="off" required />
-									</div>
-									<div class="form-group">
-										<div class="row">
-
-											<div class="col-lg-3 offset-lg-2 col-md-3 offset-md-2">
-												<input type="submit" name="code-cancel" id="code-cancel" tabindex="2" class="form-control btn btn-danger" value="Cancel" />
-
-											</div>
-											<div class="col-lg-3 offset-lg-2 col-md-3 offset-md-2">
-												<input type="submit" name="code-submit" id="recover-submit" tabindex="2" class="form-control btn btn-success" value="Continue" />
-											</div>
+								<div class="mb-3">
+									<input type="text" name="code" id="code" tabindex="1" class="form-control" placeholder="Enter validation code" autocomplete="off" required value="<?= $code ?>" />
+								</div>
+								<div class="form-group">
+									<div class="row">
+										<div class="col-md-3 offset-md-2">
+											<input type="submit" value="Cancel" name="code-cancel" id="code-cancel" tabindex="2" class="form-control btn btn-danger"/>
+										</div>
+										<div class="col-md-3 offset-md-2">
+											<input type="submit" value="Submit" name="code-submit" id="code-submit" tabindex="2" class="form-control btn btn-success"/>
 										</div>
 									</div>
-									<input type="hidden" class="hide" name="token" id="token" value="">
-								</form>
-							</div>
+								</div>
+								<input type="hidden" class="hide" name="token" id="token">
+							</form>
 						</div>
 					</div>
 				</div>
