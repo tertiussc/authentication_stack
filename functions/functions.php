@@ -61,7 +61,7 @@ function token_generator()
 
 /** Check if the email is in use
  * 
- * @param string $email The user's email addressed
+ * @param string $email The user's email address
  * 
  * @return boolean True if it exist and false if not
  */
@@ -80,7 +80,7 @@ function email_exist($email)
 
 /** Check if the username is in use
  * 
- * @param string $username The user's email addressed
+ * @param string $username The user's username
  * 
  * @return boolean True if it exist and false if not
  */
@@ -383,7 +383,7 @@ function register_user($first_name, $last_name, $username, $email, $password)
 /********** Activate functions **********/
 
 
-/**Activate the user
+/** Activate the user
  * This function will activate the user status in the DB when the user clicks on the activation email
  * 
  * @return void Set a success message in sessions and redirect the user to the login page
@@ -431,6 +431,70 @@ function activate_user()
                     <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
                 </div>";
             }
+        }
+    }
+}
+
+/********** Recovery functions **********/
+
+/** Recover the user's password
+ * 
+ * Check to see if the SESSION token matches the POST token
+ * 
+ * If the email exist create a validation code, set a cookie and send the email
+ * 
+ * @return void Send the user a email link to reset password
+ */
+function recover_password()
+{
+    if ($_SERVER['REQUEST_METHOD'] == "POST") {
+        if (isset($_SESSION['token']) && $_POST['token'] === $_SESSION['token']) {
+
+            // Clean and escape the data from the form on submission
+            $email = clean($_POST['email']);
+            $email = escape($email);
+
+            // Send the email when a correct email is entered into the form
+            if (email_exist($email)) {
+
+                // Create a validation code
+                $validation_code = md5($email . microtime());
+
+                // Set cookie
+                setcookie('temp_access_code', $validation_code, time() + 60);
+
+                // send the validation code to the database
+                $sql = "UPDATE users SET validation_code = '$validation_code' WHERE email = '$email'";
+                $result = query($sql);
+                confirm($result);
+
+                // Assign email variable values
+                $email = "$email";
+                $subject = "Reset your password";
+                $message = "Here is your password reset code: {$validation_code} click here to reset you password http://localhost/authentication_stack/code.php?email=$email&code=$validation_code";
+                $headers = "From: noreply@yourwebsite.com";
+
+                // Send the email
+                if (send_email($email, $subject, $message, $headers)) {
+                    echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
+                    <strong>Password reset email sent</strong> Please check your email: {$email} to reset your password.
+                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                </div>";
+                } else {
+                    echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                    <strong>Unable to send reset email</strong> Please try again later
+                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                </div>";
+                };
+            } else {
+                // Show error if the email does not exist
+                echo "<p class='callout-danger'>This email address does not exist</p>";
+            }
+
+            echo "Form is working";
+        } else {
+            // If the token is not set or does not match redirect the user
+            redirect("login.php");
         }
     }
 }
