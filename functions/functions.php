@@ -285,9 +285,9 @@ function login_user($email, $password, $remember)
             return true;
         } elseif (password_verify($password, $db_password) && $active == 1) {
 
-            // if remember was checked set a cookie
+            // if remember was checked set a cookie to expire in 10years (315360000 seconds)
             if ($remember == "1") {
-                setcookie('save_login', 'true', time() + 86400);
+                setcookie('save_login', 'true', time() + 315360000);
             }
 
             // save the authentication in the session
@@ -454,7 +454,7 @@ function recover_password()
                 // Create a validation code
                 $validation_code = md5($email . microtime());
 
-                // Set cookie with expiry of 1 hour. if the cookie expire the user will have to recover password again
+                // Set cookie for reset to 1 hour (3600 seconds)
                 setcookie('temp_access_code', $validation_code, time() + 3600);
 
                 // send the validation code to the database
@@ -495,7 +495,19 @@ function recover_password()
     }
 }
 
-
+/** Validate the validation code
+ * 
+ * Check to see if any values was passed via the URL
+ * 
+ * Check to see if the cookie has expired
+ * 
+ * Clean and escape the data automatically populated via the $_GET
+ * 
+ * Retrieve the user from the database
+ * 
+ * @return void If everything is in order redirect the user to the password reset page to reset the user's password
+ *  
+ */
 function validate_code()
 {
     if (isset($_COOKIE['temp_access_code'])) {
@@ -509,9 +521,10 @@ function validate_code()
 
         ) {
 
-            // Execute code
+            // Check to see if the submit button was pressed
             if (isset($_POST['code-submit'])) {
-                // Do something
+                
+                // Temp display message to check that submit was pressed
                 echo "<p class='callout-success'>Email and Code received and submit button pressed.</p>";
 
                 // clean the data
@@ -530,7 +543,7 @@ function validate_code()
                 // Check to see if the record was found
                 if (row_count($result) == 1) {
                     // if all is good redirect to reset page
-                    redirect("reset.php");
+                    redirect("reset.php?email=$email&code=$validation_code");
                 } else {
                     // if the user was not found show error
                     echo "<p class='callout-danger'>Please confirm reset code to reset your password </p>";
@@ -564,3 +577,4 @@ function validate_code()
         redirect("recover.php");
     }
 }
+
