@@ -219,6 +219,14 @@ function validate_login()
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
+        // Check that the required fields are not empty
+        if (empty($_POST['email'])) {
+            $errors[] = "Your login email is required";
+        }
+        if (empty($_POST['password'])) {
+            $errors[] = "Your password is required";
+        }
+
         // Clean inputs
         $email = clean($_POST['email']);
         $password = clean($_POST['password']);
@@ -226,13 +234,6 @@ function validate_login()
         $remember = isset($_POST['remember']);
         $remember = clean($remember);
 
-        // Check that the required fields are not empty
-        if (empty($email)) {
-            $errors = "Your login email is required";
-        }
-        if (empty($password)) {
-            $errors = "Your password is required";
-        }
 
         // Display errors when found
         if (!empty($errors)) {
@@ -245,7 +246,7 @@ function validate_login()
             if (login_user($email, $password, $remember)) {
 
                 // Redirect the user if login is successful
-                redirect("admin.php");
+                redirect("index.php");
             } else {
                 echo "<p class='callout-danger'>Login credentials not correct</p><br>";
             }
@@ -289,10 +290,7 @@ function login_user($email, $password, $remember)
         $active = $row['active'];
 
         if ($active != 1) {
-            set_messages("<div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                    <strong>Account not active!</strong> Please use activation email to activate your account.
-                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-                </div>");
+            echo "<p class='callout-danger'>User not active, please check your email for activation link</p>";
             return true;
         } elseif (password_verify($password, $db_password) && $active == 1) {
 
@@ -308,13 +306,14 @@ function login_user($email, $password, $remember)
             return true;
         } else {
             // If the password does not match return false
-            echo "<p class='callout-danger'>Password does not match</p>";
+            echo "<p class='callout-danger'>Incorrect login details</p>";
             return false;
         }
 
         return true;
     } else {
         return false;
+        echo "<p class='callout-danger'>Incorrect login details</p>";
     }
 }
 
@@ -347,8 +346,6 @@ function logged_in()
  * 
  * @param string $password      Password from the registration form
  * 
- * 
- * 
  * Create a hashed validation code
  * 
  * @return void Send an email to the user to activate their account 
@@ -379,10 +376,7 @@ function register_user($first_name, $last_name, $username, $email, $password)
     $subject = "Activate your account";
     $message = "Please click the link to activate you account. <br>";
     $message .= "http://localhost/authentication_stack/activate.php?email=$email&code=$validation_code";
-    // *** Temporary storing the url in session for testing use later
-    $_SESSION['activate_url'] .= "http://localhost/authentication_stack/activate.php?email=$email&code=$validation_code";
     $headers = "From: noreply@yourwebsite.com";
-
 
     // Send the email by calling the email function
     send_email($email, $subject, $message, $headers);
@@ -401,7 +395,7 @@ function register_user($first_name, $last_name, $username, $email, $password)
 function activate_user()
 {
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        if (isset($_GET['email'])) {
+        if (isset($_GET['email']) && isset($_GET['code'])) {
             // clean the data
             $email = clean($_GET['email']);
             $validation_code = clean($_GET['code']);
@@ -437,12 +431,13 @@ function activate_user()
                 // Redirect to login
                 redirect("login.php");
             } else {
-                echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                    <strong>Account not activated, user not found</strong> Please try and click (or copy exactly) the activation email link again
-                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-                </div>";
+                echo "<p class='callout-danger'>This user is not registered</p>";
             }
+        } else {
+            echo "<p class='callout-danger'>No/Incorrect activation data received.</p>";
         }
+    } else {
+        echo "<p class='callout-danger'>No/Incorrect activation data received.</p>";
     }
 }
 
@@ -459,7 +454,7 @@ function activate_user()
 function recover_password()
 {
     if ($_SERVER['REQUEST_METHOD'] == "POST") {
-        if (isset($_SESSION['token']) && $_POST['token'] === $_SESSION['token']) {
+        if (isset($_SESSION['token']) && isset($_POST['token']) && $_POST['token'] === $_SESSION['token']) {
 
             // Clean and escape the data from the form on submission
             $email = clean($_POST['email']);
@@ -512,14 +507,26 @@ function recover_password()
                 echo "<p class='callout-danger'>This email address does not exist</p>";
             }
         } else {
-            // If the token is not set or does not match redirect the user
-            redirect("login.php");
+            echo "<p class='callout-danger'>The security token does not match</p>";
         }
     }
 }
 
 /** Reset the password
  * 
+ * Check to see if the session is still valid
+ * 
+ * Check to see if email and validation code was received via GET method
+ * 
+ * Check that the submitted data comes from the form on the page
+ * 
+ * Check that the submitted passwords match
+ * 
+ * Clean the data
+ * 
+ * Has the password
+ * 
+ * @return void If all is in order update the user'spassword in the database and redirect the user to login page
  */
 function reset_password()
 {
@@ -528,7 +535,7 @@ function reset_password()
 
         // Check that the email and code is received via get
         if (isset($_GET['email']) && isset($_GET['code'])) {
-            
+
             // Check that the information comes from the submitted form
             if (isset($_GET['email']) && isset($_POST['token']) && $_SESSION['token'] === $_POST['token']) {
 
@@ -644,10 +651,8 @@ function validate_code()
                 redirect("login.php");
             }
         } else {
-            set_messages("<div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                    <strong>Invalid reset data received</strong> Please check your email.
-                    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-                </div>");
+            echo "<p class='callout-danger'>Please enter your email and the verification code sent to you.</p>";
+
         }
     } else {
 
