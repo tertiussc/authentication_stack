@@ -4,6 +4,11 @@
 <div class="container">
 	<div class="row">
 		<div class="col-md-6 offset-md-3 mt-5">
+			<?php
+			display_message();
+			reset_password();
+
+			?>
 			<div class="card panel-login">
 				<div class="card-header">
 					<div class="row">
@@ -17,7 +22,6 @@
 					<div class="row">
 						<div class="col-lg-12">
 							<form id="register-form" method="post" role="form">
-
 								<div class="mb-3">
 									<input type="password" name="password" id="password" tabindex="2" class="form-control" placeholder="Password" required>
 								</div>
@@ -31,6 +35,7 @@
 										</div>
 									</div>
 								</div>
+								<input type="hidden" class="hide" name="token" id="token" value="<?php echo token_generator(); ?>">
 							</form>
 						</div>
 					</div>

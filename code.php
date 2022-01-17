@@ -2,8 +2,8 @@
 <?php
 // PHP code
 // assign a value to $code to populate the form
-isset($_GET['email']) ? $email = $_GET['email'] : $email = '';
-isset($_GET['code']) ? $code = $_GET['code'] : $code = '';
+$email = isset($_GET['email']) ? $email = $_GET['email'] : $email = '';
+$code = isset($_GET['code']) ? $code = $_GET['code'] : $code = '';
 
 ?>
 <main class="container">
@@ -12,7 +12,8 @@ isset($_GET['code']) ? $code = $_GET['code'] : $code = '';
 			<div class="col-md-6 offset-md-3 mt-5">
 
 				<?php
-				display_message(); // Check for messages first	
+				display_message(); // Check for messages first
+				var_dump($_POST);	
 				validate_code();
 				?>
 			</div>
@@ -24,7 +25,7 @@ isset($_GET['code']) ? $code = $_GET['code'] : $code = '';
 							<div class="text-center">
 								<h2>Validate Reset</h2>
 							</div>
-							<form id="register-form" method="post" role="form" autocomplete="off">
+							<form id="register-form" method="POST" role="form" autocomplete="off">
 								<div class="mb-3">
 									<input type="text" name="email" id="email" tabindex="1" class="form-control" placeholder="Enter email address" autocomplete="off" required value="<?= $email ?>" />
 								</div>
@@ -34,14 +35,14 @@ isset($_GET['code']) ? $code = $_GET['code'] : $code = '';
 								<div class="form-group">
 									<div class="row">
 										<div class="col-md-3 offset-md-2">
-											<input type="submit" value="Cancel" name="code-cancel" id="code-cancel" tabindex="2" class="form-control btn btn-danger"/>
+											<input type="submit" value="Cancel" name="code-cancel" id="code-cancel" tabindex="2" class="form-control btn btn-danger" />
 										</div>
 										<div class="col-md-3 offset-md-2">
-											<input type="submit" value="Submit" name="code-submit" id="code-submit" tabindex="2" class="form-control btn btn-success"/>
+											<input type="hidden" class="hide" name="token" id="token" value="<?php echo token_generator(); ?>">
+											<input type="submit" value="submit" name="code-submit" id="code-submit" tabindex="2" class="form-control btn btn-success" />
 										</div>
 									</div>
 								</div>
-								<input type="hidden" class="hide" name="token" id="token">
 							</form>
 						</div>
 					</div>
