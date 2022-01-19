@@ -133,6 +133,7 @@ function send_email($email, $subject, $message)
         $mail->Password   = 'secret';                               //SMTP password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
         $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
+        $mail->CharSet    = 'UTF-8';                                //Use extended character set for language support
 
         //Recipients
         $mail->setFrom('noreply@meliorateafrica.com');
