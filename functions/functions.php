@@ -1,5 +1,15 @@
 <?php
 
+/********** Include PHPMailer Library **********/
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require("includes/mail/src/Exception.php");
+require("includes/mail/src/PHPMailer.php");
+require("includes/mail/src/SMTP.php");
+
+
 /********** Helper functions **********/
 
 /** Clean strings from inputs
@@ -107,14 +117,48 @@ function username_exist($username)
  * 
  * @param string $message The email message
  * 
- * @param string $headers The email header (from email information)
- * 
- * @return void Send the email
+ * @return true Return true if the message was sent false if not
  */
-function send_email($email, $subject, $message, $headers)
+function send_email($email, $subject, $message)
 {
-    // php mail built in function
-    return mail($email, $subject, $message, $headers);
+    $mail = new PHPMailer(TRUE);
+
+    try {
+        //Server settings
+        // $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
+        $mail->isSMTP();                                            //Send using SMTP
+        $mail->Host       = 'smtp.example.com';                     //Set the SMTP server to send through
+        $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
+        $mail->Username   = 'user@example.com';                     //SMTP username
+        $mail->Password   = 'secret';                               //SMTP password
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
+        $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
+
+        //Recipients
+        $mail->setFrom('noreply@meliorateafrica.com');
+        $mail->addAddress($email);     //Add a recipient
+        // $mail->addAddress('ellen@example.com');               //Name is optional
+        $mail->addReplyTo('info@MeliorateAfrica.com', 'Meliorate Africa');
+        // $mail->addCC('cc@example.com');
+        // $mail->addBCC('bcc@example.com');
+
+        //Attachments
+        //$mail->addAttachment('/var/tmp/file.tar.gz');         //Add attachments
+        //$mail->addAttachment('/tmp/image.jpg', 'new.jpg');    //Optional name
+
+        //Content
+        $mail->isHTML(true);                                  //Set email format to HTML
+        $mail->Subject = $subject;
+        $mail->Body    = $message;
+        $mail->AltBody = strip_tags($message);
+
+        $mail->send();
+        echo "<p class='callout-success'>The email has been sent.</p>";
+        return true;
+    } catch (Exception $e) {
+        echo "<p class='callout-danger'>Message could not be sent. Mailer Error: {$mail->ErrorInfo}</p>";
+        return false;
+    }
 }
 
 
@@ -127,8 +171,6 @@ function send_email($email, $subject, $message, $headers)
  * Check to see if $first_name, $last_name and $username is between the minimum and maximum allowed characters
  * 
  * Check that the username and email is not in use
- * 
- * 
  * 
  * @return string $error Returns error messages if any is found
  */
@@ -379,7 +421,7 @@ function register_user($first_name, $last_name, $username, $email, $password)
     $headers = "From: noreply@yourwebsite.com";
 
     // Send the email by calling the email function
-    send_email($email, $subject, $message, $headers);
+    send_email($email, $subject, $message);
 
     return true;
 }
@@ -483,7 +525,7 @@ function recover_password()
 
                 // Send the email 
                 // *** Attention => remove the exclamation(!) from the send_email function
-                if (!send_email($email, $subject, $message, $headers)) {
+                if (!send_email($email, $subject, $message)) {
 
                     // Set a message
                     set_messages("<div class='alert alert-success alert-dismissible fade show' role='alert'>
@@ -652,7 +694,6 @@ function validate_code()
             }
         } else {
             echo "<p class='callout-danger'>Please enter your email and the verification code sent to you.</p>";
-
         }
     } else {
 
