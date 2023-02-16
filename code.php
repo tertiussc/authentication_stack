@@ -13,7 +13,7 @@ $code = isset($_GET['code']) ? $code = $_GET['code'] : $code = '';
 
 				<?php
 				display_message(); // Check for messages first
-				var_dump($_POST);	
+				var_dump($_POST);
 				validate_code();
 				?>
 			</div>
